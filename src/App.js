@@ -21,8 +21,6 @@ import {
   ArrowRight,
   FileText,
   LogOut,
-  Mail,
-  Lock,
   Package,
   Check,
   Star,
@@ -288,86 +286,26 @@ function localSymptomMatch(text) {
 }
 
 /* ---------------------------------------------------------------------- */
-/*  Account storage helpers (persists across visits via artifact storage) */
-/* ---------------------------------------------------------------------- */
-
-const ACCOUNTS_KEY = "symptra_accounts_v1";
-
-async function loadAccounts() {
-  try {
-    const res = await window.storage.get(ACCOUNTS_KEY, true);
-    return res && res.value ? JSON.parse(res.value) : {};
-  } catch (e) {
-    return {};
-  }
-}
-
-async function saveAccounts(accounts) {
-  try {
-    await window.storage.set(ACCOUNTS_KEY, JSON.stringify(accounts), true);
-    return true;
-  } catch (e) {
-    return false;
-  }
-}
-
-/* ---------------------------------------------------------------------- */
-/*  Auth screen: real sign up / log in + guest quick access               */
+/*  Entry screen: just a name + role, no account/password required       */
 /* ---------------------------------------------------------------------- */
 
 const AuthScreen = ({ onAuth }) => {
-  const [mode, setMode] = useState("login"); // "login" | "signup"
   const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
   const [role, setRole] = useState("patient");
   const [error, setError] = useState("");
-  const [loading, setLoading] = useState(false);
 
-  const switchMode = (next) => {
-    setMode(next);
-    setError("");
-  };
-
-  const submit = async (e) => {
+  const submit = (e) => {
     e.preventDefault();
-    setError("");
-    if (!email.trim() || !password.trim() || (mode === "signup" && !name.trim())) {
-      setError("Fill in all fields to continue.");
+    if (!name.trim()) {
+      setError("Enter your name to continue.");
       return;
     }
-    setLoading(true);
-    const key = email.trim().toLowerCase();
-    const accounts = await loadAccounts();
-
-    if (mode === "signup") {
-      if (accounts[key]) {
-        setError("An account with this email already exists — try logging in instead.");
-        setLoading(false);
-        return;
-      }
-      accounts[key] = { name: name.trim(), password, role };
-      const ok = await saveAccounts(accounts);
-      setLoading(false);
-      if (!ok) {
-        setError("Couldn't create your account right now. Please try again.");
-        return;
-      }
-      onAuth({ name: name.trim(), role, email: key });
-    } else {
-      const acc = accounts[key];
-      if (!acc || acc.password !== password) {
-        setError("That email and password don't match an account.");
-        setLoading(false);
-        return;
-      }
-      setLoading(false);
-      onAuth({ name: acc.name, role: acc.role, email: key });
-    }
+    setError("");
+    onAuth({ name: name.trim(), role });
   };
 
   const continueAsGuest = () => {
-    onAuth({ name: "Guest", role: "patient", email: null, guest: true });
+    onAuth({ name: "Guest", role: "patient", guest: true });
   };
 
   return (
@@ -380,104 +318,45 @@ const AuthScreen = ({ onAuth }) => {
           <p className="font-display login-brand-name">Symptra</p>
         </div>
 
-        <h1 className="font-display login-title">{mode === "login" ? "Welcome back" : "Create your account"}</h1>
-        <p className="login-sub">
-          {mode === "login"
-            ? "Log in to check symptoms and manage your care."
-            : "Sign up in seconds. Your account is saved so you can come back anytime."}
-        </p>
-
-        <div className="role-toggle" style={{ marginBottom: 20, width: "100%" }}>
-          <button
-            type="button"
-            className={`role-toggle-btn ${mode === "login" ? "active" : ""}`}
-            style={{ flex: 1 }}
-            onClick={() => switchMode("login")}
-          >
-            Log in
-          </button>
-          <button
-            type="button"
-            className={`role-toggle-btn ${mode === "signup" ? "active" : ""}`}
-            style={{ flex: 1 }}
-            onClick={() => switchMode("signup")}
-          >
-            Sign up
-          </button>
-        </div>
+        <h1 className="font-display login-title">Welcome</h1>
+        <p className="login-sub">Enter your name to check symptoms and manage your care.</p>
 
         <form onSubmit={submit}>
-          {mode === "signup" && (
-            <>
-              <label className="field-label">Name</label>
-              <div className="input-with-icon">
-                <UserPlus size={16} className="input-icon" />
-                <input
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  placeholder="e.g. Ananya Rao"
-                  className="field-input with-icon"
-                />
-              </div>
-            </>
-          )}
-
-          <label className="field-label">Email</label>
+          <label className="field-label">Name</label>
           <div className="input-with-icon">
-            <Mail size={16} className="input-icon" />
+            <UserPlus size={16} className="input-icon" />
             <input
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder="you@example.com"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              placeholder="e.g. Ananya Rao"
               className="field-input with-icon"
             />
           </div>
 
-          <label className="field-label">Password</label>
-          <div className="input-with-icon">
-            <Lock size={16} className="input-icon" />
-            <input
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              placeholder="••••••••"
-              className="field-input with-icon"
-            />
+          <label className="field-label">I am a</label>
+          <div className="role-toggle" style={{ marginBottom: 16, width: "100%" }}>
+            <button
+              type="button"
+              className={`role-toggle-btn ${role === "patient" ? "active" : ""}`}
+              style={{ flex: 1 }}
+              onClick={() => setRole("patient")}
+            >
+              Patient
+            </button>
+            <button
+              type="button"
+              className={`role-toggle-btn ${role === "doctor" ? "active" : ""}`}
+              style={{ flex: 1 }}
+              onClick={() => setRole("doctor")}
+            >
+              Clinician
+            </button>
           </div>
-
-          {mode === "signup" && (
-            <>
-              <label className="field-label">I am a</label>
-              <div className="role-toggle" style={{ marginBottom: 16, width: "100%" }}>
-                <button
-                  type="button"
-                  className={`role-toggle-btn ${role === "patient" ? "active" : ""}`}
-                  style={{ flex: 1 }}
-                  onClick={() => setRole("patient")}
-                >
-                  Patient
-                </button>
-                <button
-                  type="button"
-                  className={`role-toggle-btn ${role === "doctor" ? "active" : ""}`}
-                  style={{ flex: 1 }}
-                  onClick={() => setRole("doctor")}
-                >
-                  Clinician
-                </button>
-              </div>
-            </>
-          )}
 
           {error && <p className="error-text">{error}</p>}
 
-          <button type="submit" disabled={loading} className="btn-primary login-submit-btn">
-            {loading ? "Please wait…" : (
-              <>
-                {mode === "login" ? "Log in" : "Create account"} <ArrowRight size={16} />
-              </>
-            )}
+          <button type="submit" className="btn-primary login-submit-btn">
+            Continue <ArrowRight size={16} />
           </button>
         </form>
 
@@ -485,12 +364,6 @@ const AuthScreen = ({ onAuth }) => {
           <Compass size={16} />
           Continue as guest
         </button>
-
-        <p className="login-footnote">
-          {mode === "login"
-            ? "New here? Switch to Sign up above — no email verification needed for this demo."
-            : "Already have an account? Switch to Log in above."}
-        </p>
       </div>
     </div>
   );
@@ -682,7 +555,7 @@ const TopBar = ({ role, name, setMobileOpen, alertCount, onLogout }) => (
 /*  Landing                                                                */
 /* ---------------------------------------------------------------------- */
 
-const Landing = ({ setView }) => (
+const Landing = ({ setView, onChoosePackage }) => (
   <div className="fade-in-up">
     <section className="hero">
       <div className="hero-inner">
@@ -735,6 +608,42 @@ const Landing = ({ setView }) => (
             </div>
             <h3 className="font-display feature-title">{f.title}</h3>
             <p className="feature-desc">{f.desc}</p>
+          </div>
+        ))}
+      </div>
+    </section>
+
+    <section className="features">
+      <h2 className="font-display page-title" style={{ textAlign: "center", fontSize: 30, marginBottom: 8 }}>
+        Plans & Pricing
+      </h2>
+      <p className="page-sub" style={{ textAlign: "center", marginBottom: 28 }}>
+        Choose what fits you — you can switch plans anytime.
+      </p>
+      <div className="packages-grid">
+        {PACKAGES.map((p) => (
+          <div key={p.id} className={`card package-card ${p.highlight ? "highlight" : ""}`}>
+            {p.highlight && (
+              <span className="package-badge">
+                <Star size={12} /> Most popular
+              </span>
+            )}
+            <p className="package-name font-display">{p.name}</p>
+            <p className="package-price">{p.price}</p>
+            <p className="package-tagline">{p.tagline}</p>
+            <ul className="package-features">
+              {p.features.map((f) => (
+                <li key={f}>
+                  <Check size={14} className="package-check" /> {f}
+                </li>
+              ))}
+            </ul>
+            <button
+              className={p.highlight ? "btn-primary package-btn" : "btn-outline package-btn"}
+              onClick={() => onChoosePackage(p)}
+            >
+              Choose {p.name}
+            </button>
           </div>
         ))}
       </div>
@@ -1272,7 +1181,7 @@ export default function App() {
     content = (
       <ConfirmationScreen
         pkg={pendingPackage}
-        onBack={() => setView("packages")}
+        onBack={() => setView("landing")}
         onConfirm={() => {
           setSelectedPackage(pendingPackage);
           setPendingPackage(null);
@@ -1287,7 +1196,15 @@ export default function App() {
         <div className="app-main-col">
           <TopBar role={role} name={activeName} setMobileOpen={setMobileOpen} alertCount={alertCount} onLogout={handleLogout} />
           <main>
-            {view === "landing" && <Landing setView={setView} />}
+            {view === "landing" && (
+              <Landing
+                setView={setView}
+                onChoosePackage={(pkg) => {
+                  setPendingPackage(pkg);
+                  setView("confirmation");
+                }}
+              />
+            )}
             {view === "checker" && <SymptomChecker onSaveCheck={handleSaveCheck} currentName={activeName} />}
             {view === "patientDashboard" && (
               <PatientDashboard
