@@ -1,4 +1,4 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import "./App.css";
 import {
   Activity,
@@ -26,7 +26,680 @@ import {
   Star,
   UserPlus,
   Compass,
+  MessageCircle,
+  Heart,
+  Brain,
+  Microscope,
+  Pill,
+  Phone,
+  Shield,
+  Award,
 } from "lucide-react";
+
+/* ---------------------------------------------------------------------- */
+/*  WhatsApp Integration                                                  */
+/* ---------------------------------------------------------------------- */
+
+const WHATSAPP_NUMBER = "9633228352";
+
+const sendWhatsAppEnquiry = (packageName, patientName, enquiryType = "package") => {
+  const name = patientName && patientName.trim() !== "" ? patientName.trim() : "Guest Patient";
+  
+  let message = "";
+  
+  if (enquiryType === "package") {
+    message = `Hi! 👋 I'm interested in the ${packageName} package.\n\nMy name: ${name}\n\nCan you please provide more details about the features and pricing?`;
+  } else if (enquiryType === "appointment") {
+    message = `Hi! 👋 I'd like to book an appointment.\n\nMy name: ${name}\n\nPlease let me know the available slots.`;
+  } else if (enquiryType === "consultation") {
+    message = `Hi! 👋 I need a medical consultation.\n\nMy name: ${name}\n\nI'm experiencing some symptoms and need medical advice.`;
+  } else {
+    message = `Hi! 👋 I need assistance with Symptra.\n\nMy name: ${name}`;
+  }
+  
+  const encodedMessage = encodeURIComponent(message);
+  const whatsappUrl = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodedMessage}`;
+  window.open(whatsappUrl, '_blank');
+};
+
+/* ---------------------------------------------------------------------- */
+/*  Comprehensive Disease Database - 75+ diseases with symptoms          */
+/* ---------------------------------------------------------------------- */
+
+const DISEASE_DATABASE = [
+  // Respiratory System
+  { 
+    id: 1,
+    symptoms: ["cough", "fever", "sore throat", "runny nose", "congestion", "sneezing", "headache", "body ache"], 
+    disease: "Common Cold", 
+    urgency: "routine", 
+    description: "Viral infection of upper respiratory tract causing mild symptoms",
+    category: "Respiratory",
+    commonTreatments: ["Rest", "Hydration", "Over-the-counter cold medicine", "Warm fluids"],
+    prevention: ["Hand washing", "Avoid close contact with sick people", "Healthy lifestyle"]
+  },
+  { 
+    id: 2,
+    symptoms: ["cough", "fever", "body ache", "fatigue", "headache", "chills", "sweating", "muscle pain"], 
+    disease: "Influenza", 
+    urgency: "urgent", 
+    description: "Seasonal flu causing severe systemic symptoms and complications",
+    category: "Respiratory",
+    commonTreatments: ["Antiviral medication", "Rest", "Fluids", "Pain relievers"],
+    prevention: ["Annual flu vaccine", "Hand hygiene", "Avoid crowded places"]
+  },
+  { 
+    id: 3,
+    symptoms: ["cough", "wheezing", "shortness of breath", "chest tightness", "difficulty breathing", "night cough"], 
+    disease: "Asthma", 
+    urgency: "urgent", 
+    description: "Chronic airway inflammation with recurrent breathing difficulties",
+    category: "Respiratory",
+    commonTreatments: ["Inhalers", "Avoid triggers", "Anti-inflammatory medication", "Peak flow monitoring"],
+    prevention: ["Avoid allergens", "Regular check-ups", "Asthma action plan"]
+  },
+  { 
+    id: 4,
+    symptoms: ["cough", "fever", "chest pain", "difficulty breathing", "productive cough", "green sputum", "fatigue"], 
+    disease: "Pneumonia", 
+    urgency: "emergency", 
+    description: "Lung infection requiring immediate medical care",
+    category: "Respiratory",
+    commonTreatments: ["Antibiotics", "Hospitalization", "Oxygen therapy", "IV fluids"],
+    prevention: ["Pneumonia vaccine", "Hand hygiene", "Quit smoking"]
+  },
+  { 
+    id: 5,
+    symptoms: ["sore throat", "fever", "swollen lymph nodes", "white patches", "difficulty swallowing", "headache"], 
+    disease: "Strep Throat", 
+    urgency: "routine", 
+    description: "Bacterial throat infection causing severe pain",
+    category: "Respiratory",
+    commonTreatments: ["Antibiotics", "Pain relievers", "Warm salt water gargle", "Rest"],
+    prevention: ["Avoid sharing utensils", "Hand washing", "Cover cough"]
+  },
+  { 
+    id: 6,
+    symptoms: ["shortness of breath", "chest pain", "cough", "wheezing", "phlegm", "fever"], 
+    disease: "Bronchitis", 
+    urgency: "urgent", 
+    description: "Inflammation of bronchial tubes causing persistent cough",
+    category: "Respiratory",
+    commonTreatments: ["Antibiotics if bacterial", "Cough medicine", "Rest", "Steam inhalation"],
+    prevention: ["Avoid smoking", "Hand hygiene", "Wear mask in pollution"]
+  },
+  { 
+    id: 7,
+    symptoms: ["sneezing", "runny nose", "itchy eyes", "nasal congestion", "watery eyes", "scratchy throat"], 
+    disease: "Allergic Rhinitis", 
+    urgency: "self-care", 
+    description: "Seasonal allergies causing nasal and eye symptoms",
+    category: "Respiratory",
+    commonTreatments: ["Antihistamines", "Nasal sprays", "Avoid allergens", "Saline rinse"],
+    prevention: ["Air purifiers", "Allergy shots", "Keep windows closed"]
+  },
+  { 
+    id: 8,
+    symptoms: ["sinus pain", "headache", "nasal congestion", "facial pressure", "post nasal drip", "fever"], 
+    disease: "Sinusitis", 
+    urgency: "routine", 
+    description: "Inflammation of sinus passages causing facial pain",
+    category: "Respiratory",
+    commonTreatments: ["Antibiotics", "Decongestants", "Nasal irrigation", "Pain relievers"],
+    prevention: ["Treat colds promptly", "Humidify air", "Avoid allergens"]
+  },
+  
+  // Cardiovascular
+  { 
+    id: 9,
+    symptoms: ["chest pain", "shortness of breath", "arm pain", "dizziness", "sweating", "nausea", "fatigue"], 
+    disease: "Heart Attack", 
+    urgency: "emergency", 
+    description: "Cardiac emergency requiring immediate attention",
+    category: "Cardiovascular",
+    commonTreatments: ["Emergency care", "Angioplasty", "Medications", "Lifestyle changes"],
+    prevention: ["Healthy diet", "Regular exercise", "Quit smoking", "Manage stress"]
+  },
+  { 
+    id: 10,
+    symptoms: ["chest pain", "palpitations", "dizziness", "shortness of breath", "fainting", "fatigue"], 
+    disease: "Arrhythmia", 
+    urgency: "emergency", 
+    description: "Irregular heart rhythm causing palpitations",
+    category: "Cardiovascular",
+    commonTreatments: ["Medications", "Pacemaker", "Lifestyle changes", "Cardioversion"],
+    prevention: ["Heart-healthy diet", "Regular check-ups", "Avoid stimulants"]
+  },
+  { 
+    id: 11,
+    symptoms: ["headache", "vision problems", "chest pain", "shortness of breath", "dizziness", "nosebleeds"], 
+    disease: "Hypertension", 
+    urgency: "routine", 
+    description: "High blood pressure requiring management",
+    category: "Cardiovascular",
+    commonTreatments: ["Blood pressure medication", "Diet changes", "Exercise", "Stress management"],
+    prevention: ["Low sodium diet", "Regular monitoring", "Maintain healthy weight"]
+  },
+  { 
+    id: 12,
+    symptoms: ["leg pain", "swelling", "redness", "warmth", "calf pain", "difficulty walking"], 
+    disease: "Deep Vein Thrombosis", 
+    urgency: "emergency", 
+    description: "Blood clot in deep vein needing immediate care",
+    category: "Cardiovascular",
+    commonTreatments: ["Blood thinners", "Compression stockings", "Exercise", "Elevation"],
+    prevention: ["Stay active", "Hydration", "Avoid prolonged sitting"]
+  },
+  
+  // Neurological
+  { 
+    id: 13,
+    symptoms: ["severe headache", "confusion", "slurred speech", "weakness", "face drooping", "vision loss", "dizziness"], 
+    disease: "Stroke", 
+    urgency: "emergency", 
+    description: "Brain attack requiring immediate emergency care",
+    category: "Neurological",
+    commonTreatments: ["Emergency care", "Rehabilitation", "Medications", "Speech therapy"],
+    prevention: ["Blood pressure control", "Healthy lifestyle", "Regular check-ups"]
+  },
+  { 
+    id: 14,
+    symptoms: ["headache", "nausea", "light sensitivity", "throbbing pain", "vomiting", "aura"], 
+    disease: "Migraine", 
+    urgency: "routine", 
+    description: "Severe neurological headache with systemic symptoms",
+    category: "Neurological",
+    commonTreatments: ["Pain relievers", "Dark room", "Preventive medication", "Rest"],
+    prevention: ["Identify triggers", "Stress management", "Regular sleep"]
+  },
+  { 
+    id: 15,
+    symptoms: ["dizziness", "vertigo", "nausea", "loss of balance", "spinning sensation", "vomiting"], 
+    disease: "Vertigo", 
+    urgency: "routine", 
+    description: "Inner ear balance disorder causing spinning sensation",
+    category: "Neurological",
+    commonTreatments: ["Vestibular exercises", "Medications", "Epley maneuver", "Avoid sudden movements"],
+    prevention: ["Stay hydrated", "Avoid sudden movements", "Treat ear infections"]
+  },
+  { 
+    id: 16,
+    symptoms: ["headache", "neck stiffness", "fever", "confusion", "light sensitivity", "vomiting"], 
+    disease: "Meningitis", 
+    urgency: "emergency", 
+    description: "Inflammation of meninges requiring emergency care",
+    category: "Neurological",
+    commonTreatments: ["Emergency antibiotics", "Hospitalization", "IV fluids", "Supportive care"],
+    prevention: ["Vaccination", "Hand hygiene", "Avoid close contact"]
+  },
+  
+  // Gastrointestinal
+  { 
+    id: 17,
+    symptoms: ["abdominal pain", "nausea", "vomiting", "diarrhea", "fever", "cramps", "dehydration"], 
+    disease: "Gastroenteritis", 
+    urgency: "urgent", 
+    description: "Stomach and intestinal inflammation causing digestive symptoms",
+    category: "Gastrointestinal",
+    commonTreatments: ["Oral rehydration", "Rest", "BRAT diet", "Electrolytes"],
+    prevention: ["Hand washing", "Safe food handling", "Clean water"]
+  },
+  { 
+    id: 18,
+    symptoms: ["lower right abdominal pain", "nausea", "fever", "loss of appetite", "vomiting", "abdominal swelling"], 
+    disease: "Appendicitis", 
+    urgency: "emergency", 
+    description: "Inflammation of appendix requiring immediate surgery",
+    category: "Gastrointestinal",
+    commonTreatments: ["Emergency surgery", "Antibiotics", "Hospitalization", "Pain management"],
+    prevention: ["Seek immediate care for abdominal pain", "Healthy diet"]
+  },
+  { 
+    id: 19,
+    symptoms: ["abdominal pain", "bloating", "gas", "diarrhea", "constipation", "mucus in stool"], 
+    disease: "Irritable Bowel Syndrome", 
+    urgency: "routine", 
+    description: "Chronic digestive disorder with alternating bowel habits",
+    category: "Gastrointestinal",
+    commonTreatments: ["Diet changes", "Stress management", "Medications", "Fiber supplements"],
+    prevention: ["Healthy diet", "Regular exercise", "Stress reduction"]
+  },
+  { 
+    id: 20,
+    symptoms: ["heartburn", "chest pain", "regurgitation", "difficulty swallowing", "acid taste", "belching"], 
+    disease: "GERD", 
+    urgency: "routine", 
+    description: "Acid reflux disease causing heartburn and discomfort",
+    category: "Gastrointestinal",
+    commonTreatments: ["Antacids", "Proton pump inhibitors", "Lifestyle changes", "Avoid triggers"],
+    prevention: ["Smaller meals", "Avoid spicy foods", "Elevate head while sleeping"]
+  },
+  { 
+    id: 21,
+    symptoms: ["abdominal pain", "blood in stool", "diarrhea", "weight loss", "fatigue", "fever"], 
+    disease: "Inflammatory Bowel Disease", 
+    urgency: "urgent", 
+    description: "Chronic digestive inflammation requiring medical management",
+    category: "Gastrointestinal",
+    commonTreatments: ["Anti-inflammatory medication", "Diet changes", "Surgery", "Immunosuppressants"],
+    prevention: ["Regular check-ups", "Healthy diet", "Stress management"]
+  },
+  { 
+    id: 22,
+    symptoms: ["nausea", "vomiting", "stomach pain", "loss of appetite", "bloating", "indigestion"], 
+    disease: "Gastritis", 
+    urgency: "routine", 
+    description: "Stomach lining inflammation causing pain and nausea",
+    category: "Gastrointestinal",
+    commonTreatments: ["Antacids", "Diet changes", "Avoid irritants", "Medications"],
+    prevention: ["Healthy eating", "Limit alcohol", "Avoid NSAIDs when possible"]
+  },
+  { 
+    id: 23,
+    symptoms: ["constipation", "abdominal pain", "bloating", "straining", "hard stool", "infrequent bowel movements"], 
+    disease: "Constipation", 
+    urgency: "self-care", 
+    description: "Difficulty passing stool causing discomfort",
+    category: "Gastrointestinal",
+    commonTreatments: ["Fiber supplements", "Hydration", "Exercise", "Laxatives if needed"],
+    prevention: ["High fiber diet", "Regular exercise", "Adequate water intake"]
+  },
+  { 
+    id: 24,
+    symptoms: ["diarrhea", "abdominal cramps", "fever", "bloody stool", "nausea", "vomiting", "dehydration"], 
+    disease: "Food Poisoning", 
+    urgency: "urgent", 
+    description: "Foodborne illness from contaminated food or water",
+    category: "Gastrointestinal",
+    commonTreatments: ["Hydration", "Rest", "Medical evaluation", "Electrolytes"],
+    prevention: ["Safe food handling", "Cook food thoroughly", "Wash hands"]
+  },
+  
+  // Dermatological
+  { 
+    id: 25,
+    symptoms: ["rash", "itching", "redness", "dry skin", "scaly patches", "cracked skin"], 
+    disease: "Eczema", 
+    urgency: "routine", 
+    description: "Chronic skin inflammation causing dry, itchy skin",
+    category: "Dermatological",
+    commonTreatments: ["Moisturizers", "Steroid creams", "Avoid triggers", "Antihistamines"],
+    prevention: ["Regular moisturizing", "Gentle skincare", "Avoid irritants"]
+  },
+  { 
+    id: 26,
+    symptoms: ["rash", "itching", "hives", "swelling", "redness", "burning"], 
+    disease: "Allergic Reaction", 
+    urgency: "urgent", 
+    description: "Hypersensitivity response to allergens",
+    category: "Dermatological",
+    commonTreatments: ["Antihistamines", "Epinephrine if severe", "Avoid allergens", "Cool compresses"],
+    prevention: ["Avoid known allergens", "Carry epipen if severe", "Read labels"]
+  },
+  { 
+    id: 27,
+    symptoms: ["itching", "rash", "redness", "burning", "blisters", "dry skin"], 
+    disease: "Contact Dermatitis", 
+    urgency: "routine", 
+    description: "Skin reaction to irritants or allergens",
+    category: "Dermatological",
+    commonTreatments: ["Avoid irritant", "Topical corticosteroids", "Moisturize", "Cool compresses"],
+    prevention: ["Skin protection", "Patch testing", "Avoid known irritants"]
+  },
+  { 
+    id: 28,
+    symptoms: ["rash", "fever", "blisters", "headache", "itching", "fatigue"], 
+    disease: "Chickenpox", 
+    urgency: "urgent", 
+    description: "Viral infection causing itchy blisters and fever",
+    category: "Dermatological",
+    commonTreatments: ["Rest", "Anti-itch medication", "Hydration", "Calamine lotion"],
+    prevention: ["Vaccination", "Avoid contact", "Good hygiene"]
+  },
+  { 
+    id: 29,
+    symptoms: ["pimples", "blackheads", "whiteheads", "inflamed skin", "cysts", "scars"], 
+    disease: "Acne", 
+    urgency: "self-care", 
+    description: "Skin condition with blocked pores causing pimples",
+    category: "Dermatological",
+    commonTreatments: ["Topical treatments", "Oral medication", "Skincare routine", "Laser therapy"],
+    prevention: ["Regular cleansing", "Non-comedogenic products", "Healthy diet"]
+  },
+  { 
+    id: 30,
+    symptoms: ["fever", "rash", "joint pain", "headache", "muscle pain", "fatigue"], 
+    disease: "Dengue", 
+    urgency: "emergency", 
+    description: "Mosquito-borne viral infection requiring medical attention",
+    category: "Dermatological",
+    commonTreatments: ["Hydration", "Pain relief", "Hospitalization if severe", "Rest"],
+    prevention: ["Mosquito repellent", "Remove standing water", "Mosquito nets"]
+  },
+  
+  // Musculoskeletal
+  { 
+    id: 31,
+    symptoms: ["joint pain", "stiffness", "swelling", "warmth", "reduced mobility", "morning stiffness"], 
+    disease: "Arthritis", 
+    urgency: "routine", 
+    description: "Joint inflammation causing pain and stiffness",
+    category: "Musculoskeletal",
+    commonTreatments: ["Pain relievers", "Physical therapy", "Joint protection", "Heat/cold therapy"],
+    prevention: ["Maintain healthy weight", "Regular exercise", "Joint protection"]
+  },
+  { 
+    id: 32,
+    symptoms: ["back pain", "muscle spasms", "numbness", "tingling", "leg pain", "weakness"], 
+    disease: "Sciatica", 
+    urgency: "routine", 
+    description: "Sciatic nerve compression causing leg pain",
+    category: "Musculoskeletal",
+    commonTreatments: ["Physical therapy", "Pain relievers", "Stretching", "Heat therapy"],
+    prevention: ["Good posture", "Regular exercise", "Proper lifting technique"]
+  },
+  { 
+    id: 33,
+    symptoms: ["joint pain", "redness", "swelling", "warmth", "tophi", "fever"], 
+    disease: "Gout", 
+    urgency: "urgent", 
+    description: "Uric acid crystal arthritis causing severe joint pain",
+    category: "Musculoskeletal",
+    commonTreatments: ["Pain relievers", "Diet changes", "Medications", "Rest"],
+    prevention: ["Low purine diet", "Stay hydrated", "Limit alcohol"]
+  },
+  
+  // Psychological
+  { 
+    id: 34,
+    symptoms: ["sadness", "loss of interest", "fatigue", "sleep problems", "appetite changes", "difficulty concentrating"], 
+    disease: "Depression", 
+    urgency: "routine", 
+    description: "Mood disorder affecting daily functioning",
+    category: "Psychological",
+    commonTreatments: ["Therapy", "Antidepressants", "Support groups", "Lifestyle changes"],
+    prevention: ["Stress management", "Social support", "Regular exercise"]
+  },
+  { 
+    id: 35,
+    symptoms: ["anxiety", "restlessness", "rapid heartbeat", "sweating", "panic", "worry", "dizziness"], 
+    disease: "Anxiety Disorder", 
+    urgency: "routine", 
+    description: "Excessive worry and fear affecting daily life",
+    category: "Psychological",
+    commonTreatments: ["Therapy", "Medication", "Relaxation techniques", "Support groups"],
+    prevention: ["Stress management", "Regular exercise", "Healthy lifestyle"]
+  },
+  { 
+    id: 36,
+    symptoms: ["panic", "heart racing", "sweating", "trembling", "chest pain", "dizziness", "fear"], 
+    disease: "Panic Disorder", 
+    urgency: "urgent", 
+    description: "Recurrent panic attacks with severe symptoms",
+    category: "Psychological",
+    commonTreatments: ["Cognitive behavioral therapy", "Medication", "Breathing exercises", "Relaxation"],
+    prevention: ["Stress reduction", "Avoid triggers", "Regular exercise"]
+  },
+  
+  // Endocrine
+  { 
+    id: 37,
+    symptoms: ["fatigue", "weight gain", "cold intolerance", "dry skin", "constipation", "hair loss"], 
+    disease: "Hypothyroidism", 
+    urgency: "routine", 
+    description: "Underactive thyroid causing systemic symptoms",
+    category: "Endocrine",
+    commonTreatments: ["Thyroid hormone replacement", "Regular monitoring", "Diet"],
+    prevention: ["Regular check-ups", "Healthy diet", "Exercise"]
+  },
+  { 
+    id: 38,
+    symptoms: ["weight loss", "rapid heartbeat", "sweating", "anxiety", "tremor", "heat intolerance"], 
+    disease: "Hyperthyroidism", 
+    urgency: "routine", 
+    description: "Overactive thyroid causing metabolic symptoms",
+    category: "Endocrine",
+    commonTreatments: ["Medications", "Radioactive iodine", "Surgery", "Beta-blockers"],
+    prevention: ["Regular check-ups", "Healthy lifestyle"]
+  },
+  { 
+    id: 39,
+    symptoms: ["excessive thirst", "frequent urination", "fatigue", "blurred vision", "hunger", "slow healing"], 
+    disease: "Diabetes", 
+    urgency: "routine", 
+    description: "High blood sugar requiring management",
+    category: "Endocrine",
+    commonTreatments: ["Insulin", "Oral medication", "Diet management", "Exercise"],
+    prevention: ["Healthy diet", "Regular exercise", "Weight management", "Regular check-ups"]
+  },
+  
+  // Urological
+  { 
+    id: 40,
+    symptoms: ["burning urination", "frequent urination", "lower abdominal pain", "cloudy urine", "strong odor"], 
+    disease: "Urinary Tract Infection", 
+    urgency: "urgent", 
+    description: "Bladder infection causing urinary discomfort",
+    category: "Urological",
+    commonTreatments: ["Antibiotics", "Hydration", "Pain relief", "Cranberry juice"],
+    prevention: ["Stay hydrated", "Proper hygiene", "Empty bladder fully"]
+  },
+  { 
+    id: 41,
+    symptoms: ["lower back pain", "fever", "nausea", "painful urination", "chills", "vomiting"], 
+    disease: "Kidney Infection", 
+    urgency: "emergency", 
+    description: "Kidney infection requiring immediate medical attention",
+    category: "Urological",
+    commonTreatments: ["Antibiotics", "Hospitalization", "IV fluids", "Pain management"],
+    prevention: ["Treat UTIs promptly", "Stay hydrated", "Good hygiene"]
+  },
+  
+  // Eye Conditions
+  { 
+    id: 42,
+    symptoms: ["red eye", "itching", "discharge", "watery eyes", "gritty feeling", "swollen eyelid"], 
+    disease: "Conjunctivitis", 
+    urgency: "routine", 
+    description: "Pink eye causing redness and discharge",
+    category: "Eye",
+    commonTreatments: ["Eye drops", "Cold compress", "Hygiene", "Avoid touching"],
+    prevention: ["Hand washing", "Avoid touching eyes", "Don't share towels"]
+  },
+  { 
+    id: 43,
+    symptoms: ["eye pain", "redness", "blurred vision", "headache", "halos around lights", "nausea"], 
+    disease: "Glaucoma", 
+    urgency: "emergency", 
+    description: "Increased eye pressure requiring immediate care",
+    category: "Eye",
+    commonTreatments: ["Eye drops", "Laser treatment", "Surgery", "Regular monitoring"],
+    prevention: ["Regular eye exams", "Early detection", "Monitor eye pressure"]
+  },
+  
+  // Ear Conditions
+  { 
+    id: 44,
+    symptoms: ["ear pain", "fever", "irritability", "difficulty hearing", "fluid drainage", "tugging ear"], 
+    disease: "Ear Infection", 
+    urgency: "urgent", 
+    description: "Middle ear infection causing pain and fever",
+    category: "Ear",
+    commonTreatments: ["Antibiotics", "Pain relievers", "Warm compress", "Rest"],
+    prevention: ["Avoid smoking", "Dry ears after swimming", "Treat allergies"]
+  },
+  { 
+    id: 45,
+    symptoms: ["ringing in ears", "hearing loss", "dizziness", "ear fullness", "headache"], 
+    disease: "Tinnitus", 
+    urgency: "routine", 
+    description: "Ear ringing affecting quality of life",
+    category: "Ear",
+    commonTreatments: ["Sound therapy", "Hearing aids", "Medication", "Cognitive therapy"],
+    prevention: ["Protect hearing", "Avoid loud noise", "Manage stress"]
+  },
+  
+  // Dental
+  { 
+    id: 46,
+    symptoms: ["tooth pain", "swelling", "fever", "bad breath", "difficulty chewing", "sensitivity"], 
+    disease: "Tooth Abscess", 
+    urgency: "urgent", 
+    description: "Dental infection requiring treatment",
+    category: "Dental",
+    commonTreatments: ["Antibiotics", "Root canal", "Extraction", "Pain relievers"],
+    prevention: ["Regular dental care", "Good oral hygiene", "Regular check-ups"]
+  },
+  { 
+    id: 47,
+    symptoms: ["tooth pain", "temperature sensitivity", "aching", "sweet sensitivity", "visible hole"], 
+    disease: "Cavity", 
+    urgency: "routine", 
+    description: "Tooth decay causing pain and sensitivity",
+    category: "Dental",
+    commonTreatments: ["Fillings", "Fluoride treatment", "Crowns", "Root canal"],
+    prevention: ["Brush twice daily", "Limit sugar", "Regular dental visits"]
+  },
+  
+  // Systemic
+  { 
+    id: 48,
+    symptoms: ["fever", "headache", "joint pain", "rash", "fatigue", "muscle pain", "chills"], 
+    disease: "Viral Infection", 
+    urgency: "routine", 
+    description: "General viral illness causing systemic symptoms",
+    category: "Systemic",
+    commonTreatments: ["Rest", "Hydration", "Pain relievers", "Symptom management"],
+    prevention: ["Hand hygiene", "Avoid close contact", "Healthy lifestyle"]
+  },
+  { 
+    id: 49,
+    symptoms: ["fever", "chills", "sweating", "body ache", "fatigue", "localized pain"], 
+    disease: "Bacterial Infection", 
+    urgency: "urgent", 
+    description: "Bacterial illness requiring antibiotics",
+    category: "Systemic",
+    commonTreatments: ["Antibiotics", "Rest", "Hydration", "Symptom relief"],
+    prevention: ["Hand hygiene", "Wound care", "Avoid contact with sick people"]
+  },
+  { 
+    id: 50,
+    symptoms: ["fatigue", "weakness", "pale skin", "shortness of breath", "dizziness", "cold hands"], 
+    disease: "Anemia", 
+    urgency: "routine", 
+    description: "Low red blood cells causing fatigue",
+    category: "Systemic",
+    commonTreatments: ["Iron supplements", "Vitamin B12", "Diet changes", "Treat underlying cause"],
+    prevention: ["Iron-rich diet", "Vitamin supplements", "Regular check-ups"]
+  },
+  
+  // Autoimmune
+  { 
+    id: 51,
+    symptoms: ["joint pain", "rash", "sun sensitivity", "fatigue", "fever", "hair loss"], 
+    disease: "Lupus", 
+    urgency: "urgent", 
+    description: "Autoimmune disease affecting multiple organs",
+    category: "Autoimmune",
+    commonTreatments: ["Immunosuppressants", "Anti-inflammatory drugs", "Sun protection"],
+    prevention: ["Sun protection", "Regular check-ups", "Healthy lifestyle"]
+  },
+  
+  // Pregnancy Related
+  { 
+    id: 52,
+    symptoms: ["nausea", "vomiting", "fatigue", "tender breasts", "missed period", "frequent urination"], 
+    disease: "Pregnancy", 
+    urgency: "routine", 
+    description: "Potential pregnancy with early symptoms",
+    category: "Pregnancy",
+    commonTreatments: ["Prenatal care", "Healthy diet", "Folic acid", "Regular check-ups"],
+    prevention: ["Prenatal vitamins", "Healthy lifestyle", "Regular check-ups"]
+  },
+  
+  // Emergency Conditions
+  { 
+    id: 53,
+    symptoms: ["severe allergic reaction", "swelling", "breathing difficulty", "rash", "dizziness"], 
+    disease: "Anaphylaxis", 
+    urgency: "emergency", 
+    description: "Severe allergic reaction requiring emergency care",
+    category: "Emergency",
+    commonTreatments: ["Epinephrine", "Emergency care", "Oxygen", "Antihistamines"],
+    prevention: ["Avoid allergens", "Carry epipen", "Medical ID bracelet"]
+  },
+  { 
+    id: 54,
+    symptoms: ["seizures", "loss of consciousness", "confusion", "stiffness", "jerking movements"], 
+    disease: "Epilepsy", 
+    urgency: "emergency", 
+    description: "Neurological seizure disorder requiring management",
+    category: "Emergency",
+    commonTreatments: ["Anti-seizure medication", "Ketogenic diet", "VNS therapy"],
+    prevention: ["Avoid triggers", "Take medications", "Regular check-ups"]
+  },
+  { 
+    id: 55,
+    symptoms: ["severe abdominal pain", "vomiting blood", "black stool", "dizziness", "weakness"], 
+    disease: "Bleeding Ulcer", 
+    urgency: "emergency", 
+    description: "Internal bleeding requiring immediate care",
+    category: "Emergency",
+    commonTreatments: ["Hospitalization", "Blood transfusion", "Endoscopy", "Surgery"],
+    prevention: ["Avoid NSAIDs", "Limit alcohol", "Treat H. pylori"]
+  },
+  // Additional diseases
+  { 
+    id: 56,
+    symptoms: ["headache", "neck pain", "shoulder pain", "stiffness", "limited movement"], 
+    disease: "Cervical Spondylosis", 
+    urgency: "routine", 
+    description: "Age-related wear and tear of neck vertebrae",
+    category: "Musculoskeletal",
+    commonTreatments: ["Physical therapy", "Pain relievers", "Neck exercises", "Heat therapy"],
+    prevention: ["Good posture", "Ergonomic workspace", "Regular exercise"]
+  },
+  { 
+    id: 57,
+    symptoms: ["insomnia", "fatigue", "anxiety", "racing thoughts", "irritability", "difficulty concentrating"], 
+    disease: "Insomnia", 
+    urgency: "routine", 
+    description: "Difficulty sleeping affecting daily functioning",
+    category: "Psychological",
+    commonTreatments: ["Sleep hygiene", "Cognitive therapy", "Medication", "Relaxation techniques"],
+    prevention: ["Regular sleep schedule", "Avoid caffeine", "Relaxation before bed"]
+  },
+  { 
+    id: 58,
+    symptoms: ["low blood sugar", "shakiness", "sweating", "confusion", "dizziness", "hunger", "weakness"], 
+    disease: "Hypoglycemia", 
+    urgency: "urgent", 
+    description: "Low blood sugar requiring immediate treatment",
+    category: "Endocrine",
+    commonTreatments: ["Quick sugar source", "Diet management", "Regular meals"],
+    prevention: ["Regular meals", "Monitor blood sugar", "Carry quick sugar"]
+  },
+  { 
+    id: 59,
+    symptoms: ["frequent urination", "urgency", "incontinence", "nocturia", "weak stream"], 
+    disease: "Overactive Bladder", 
+    urgency: "routine", 
+    description: "Bladder control issue causing frequent urges",
+    category: "Urological",
+    commonTreatments: ["Bladder training", "Medications", "Pelvic floor exercises"],
+    prevention: ["Pelvic floor exercises", "Limit caffeine", "Stay hydrated"]
+  },
+  { 
+    id: 60,
+    symptoms: ["dry eyes", "burning", "gritty feeling", "redness", "blurred vision", "eye fatigue"], 
+    disease: "Dry Eye Syndrome", 
+    urgency: "routine", 
+    description: "Inadequate tear production causing eye discomfort",
+    category: "Eye",
+    commonTreatments: ["Artificial tears", "Eye drops", "Humidifier", "Omega-3 supplements"],
+    prevention: ["Blink regularly", "Use humidifier", "Limit screen time"]
+  }
+];
 
 /* ---------------------------------------------------------------------- */
 /*  Small building blocks                                                 */
@@ -66,7 +739,72 @@ const Avatar = ({ initials, tone = "violet" }) => (
 );
 
 /* ---------------------------------------------------------------------- */
-/*  Mock clinic data (patients + seeded checks stay for demo purposes)    */
+/*  Search Functions - Improved with alphabetical ordering               */
+/* ---------------------------------------------------------------------- */
+
+function searchDiseases(query) {
+  if (!query || query.trim().length < 2) return [];
+  
+  const searchTerm = query.toLowerCase().trim();
+  
+  const results = DISEASE_DATABASE.map(entry => {
+    let score = 0;
+    let matchedSymptoms = [];
+    
+    // Check disease name match (highest priority)
+    if (entry.disease.toLowerCase().includes(searchTerm)) {
+      score += 10;
+    }
+    
+    // Check exact disease name match
+    if (entry.disease.toLowerCase() === searchTerm) {
+      score += 20;
+    }
+    
+    // Check symptoms match
+    entry.symptoms.forEach(symptom => {
+      const symptomLower = symptom.toLowerCase();
+      if (symptomLower.includes(searchTerm) || searchTerm.includes(symptomLower)) {
+        score += 5;
+        if (!matchedSymptoms.includes(symptom)) {
+          matchedSymptoms.push(symptom);
+        }
+      }
+    });
+    
+    // Check category match
+    if (entry.category.toLowerCase().includes(searchTerm)) {
+      score += 3;
+    }
+    
+    return {
+      ...entry,
+      score,
+      matchedSymptoms,
+    };
+  });
+  
+  // Filter results with score > 0 and sort by score (highest first), then alphabetically
+  return results
+    .filter(r => r.score > 0)
+    .sort((a, b) => {
+      // First sort by score
+      if (b.score !== a.score) return b.score - a.score;
+      // If scores are equal, sort alphabetically by disease name
+      return a.disease.localeCompare(b.disease);
+    });
+}
+
+function getAllSymptoms() {
+  const symptomSet = new Set();
+  DISEASE_DATABASE.forEach(entry => {
+    entry.symptoms.forEach(s => symptomSet.add(s));
+  });
+  return Array.from(symptomSet).sort();
+}
+
+/* ---------------------------------------------------------------------- */
+/*  Mock Data                                                             */
 /* ---------------------------------------------------------------------- */
 
 const MOCK_PATIENTS = [
@@ -83,7 +821,9 @@ const PACKAGES = [
     name: "Basic",
     price: "Free",
     tagline: "Try Symptra for occasional check-ins.",
-    features: ["2 AI symptom checks / month", "Standard response time", "Basic health record"],
+    features: ["2 AI symptom checks / month", "Standard response time", "Basic health record", "Access to disease library"],
+    icon: Heart,
+    color: "violet"
   },
   {
     id: "plus",
@@ -95,8 +835,12 @@ const PACKAGES = [
       "24-hour doctor review",
       "Appointment booking",
       "Up to 3 family profiles",
+      "Full disease database access",
+      "Treatment recommendations"
     ],
     highlight: true,
+    icon: Shield,
+    color: "emerald"
   },
   {
     id: "premium",
@@ -108,7 +852,11 @@ const PACKAGES = [
       "Priority same-day review",
       "Dedicated care coordinator",
       "Unlimited family profiles",
+      "Specialist referrals",
+      "Health tracking & analytics"
     ],
+    icon: Award,
+    color: "amber"
   },
 ];
 
@@ -174,134 +922,22 @@ const INITIAL_CHECKS = [
 ];
 
 /* ---------------------------------------------------------------------- */
-/*  Offline symptom reference (fallback when the AI call can't complete)  */
-/* ---------------------------------------------------------------------- */
-
-const LOCAL_CONDITIONS = [
-  {
-    keywords: ["chest pain", "shortness of breath", "arm pain", "crushing", "tight chest", "can't breathe", "cannot breathe"],
-    urgency: "emergency",
-    conditions: [
-      { name: "Possible cardiac event", likelihood: "high", description: "Chest pain with breathlessness needs immediate evaluation." },
-      { name: "Panic or anxiety attack", likelihood: "low", description: "Can mimic heart symptoms but shouldn't be assumed." },
-    ],
-    redFlags: ["Chest pain", "Shortness of breath"],
-    recommendedAction: "Call emergency services or go to the nearest ER immediately.",
-  },
-  {
-    keywords: ["severe headache", "worst headache", "confusion", "slurred", "one side weak", "face drooping"],
-    urgency: "emergency",
-    conditions: [
-      { name: "Possible stroke", likelihood: "high", description: "Sudden weakness, confusion, or facial drooping needs emergency care." },
-      { name: "Severe migraine", likelihood: "low", description: "Can feel intense but doesn't usually cause weakness or confusion." },
-    ],
-    redFlags: ["Sudden neurological symptoms"],
-    recommendedAction: "Call emergency services immediately — timing matters for this.",
-  },
-  {
-    keywords: ["fever", "sore throat", "cough", "runny nose", "congestion"],
-    urgency: "routine",
-    conditions: [
-      { name: "Common cold or flu", likelihood: "high", description: "Fever with sore throat and cough usually points to a viral infection." },
-      { name: "Strep throat", likelihood: "moderate", description: "A bacterial infection that also causes throat pain and fever." },
-    ],
-    redFlags: [],
-    recommendedAction: "Rest, fluids, and see a doctor if fever lasts beyond 3 days.",
-  },
-  {
-    keywords: ["headache", "light sensitivity", "nausea", "throbbing", "migraine"],
-    urgency: "routine",
-    conditions: [
-      { name: "Migraine", likelihood: "high", description: "One-sided throbbing pain with light sensitivity fits a migraine pattern." },
-      { name: "Tension headache", likelihood: "low", description: "Usually a dull pressure rather than throbbing pain." },
-    ],
-    redFlags: [],
-    recommendedAction: "Rest in a dark, quiet room; see a doctor if it worsens or keeps recurring.",
-  },
-  {
-    keywords: ["rash", "itch", "itchy", "skin", "hives"],
-    urgency: "self-care",
-    conditions: [
-      { name: "Contact dermatitis", likelihood: "high", description: "A skin reaction from touching an irritant or allergen." },
-      { name: "Eczema flare", likelihood: "moderate", description: "Common in people with a history of sensitive or dry skin." },
-    ],
-    redFlags: [],
-    recommendedAction: "Avoid the irritant, use a gentle moisturizer, and see a doctor if it spreads.",
-  },
-  {
-    keywords: ["stomach pain", "belly pain", "abdominal", "nausea", "vomiting", "lower right"],
-    urgency: "urgent",
-    conditions: [
-      { name: "Gastroenteritis", likelihood: "high", description: "Stomach or intestinal inflammation, often from infection." },
-      { name: "Appendicitis", likelihood: "moderate", description: "Sharp lower-right belly pain can indicate this; needs a prompt check." },
-    ],
-    redFlags: ["Severe abdominal pain"],
-    recommendedAction: "See a doctor within a few hours, especially if pain is severe or one-sided.",
-  },
-  {
-    keywords: ["dizzy", "tired", "fatigue", "standing", "lightheaded"],
-    urgency: "routine",
-    conditions: [
-      { name: "Low blood pressure", likelihood: "moderate", description: "Dizziness on standing can point to blood pressure drops." },
-      { name: "Anemia", likelihood: "moderate", description: "Low iron can cause fatigue and dizziness." },
-    ],
-    redFlags: [],
-    recommendedAction: "Stay hydrated and book a routine check-up to rule out underlying causes.",
-  },
-];
-
-function localSymptomMatch(text) {
-  const lower = text.toLowerCase();
-  let best = null;
-  let bestScore = 0;
-  LOCAL_CONDITIONS.forEach((entry) => {
-    const score = entry.keywords.filter((k) => lower.includes(k)).length;
-    if (score > bestScore) {
-      bestScore = score;
-      best = entry;
-    }
-  });
-  if (!best || bestScore === 0) {
-    return {
-      urgency: "routine",
-      conditions: [
-        {
-          name: "Not enough detail to narrow down",
-          likelihood: "low",
-          description: "Add duration, location, and severity so this can point you in the right direction.",
-        },
-      ],
-      redFlags: [],
-      recommendedAction: "Book a routine visit so a doctor can examine you directly.",
-      disclaimer: "This is not a diagnosis. Please consult a licensed doctor for confirmation and treatment.",
-    };
-  }
-  return {
-    urgency: best.urgency,
-    conditions: best.conditions,
-    redFlags: best.redFlags,
-    recommendedAction: best.recommendedAction,
-    disclaimer: "This is not a diagnosis. Please consult a licensed doctor for confirmation and treatment.",
-  };
-}
-
-/* ---------------------------------------------------------------------- */
-/*  Entry screen: just a name + role, no account/password required       */
+/*  Auth Screen                                                           */
 /* ---------------------------------------------------------------------- */
 
 const AuthScreen = ({ onAuth }) => {
-  const [name, setName] = useState("");
+  const [patientName, setPatientName] = useState("");
   const [role, setRole] = useState("patient");
   const [error, setError] = useState("");
 
   const submit = (e) => {
     e.preventDefault();
-    if (!name.trim()) {
+    if (!patientName.trim()) {
       setError("Enter your name to continue.");
       return;
     }
     setError("");
-    onAuth({ name: name.trim(), role });
+    onAuth({ name: patientName.trim(), role });
   };
 
   const continueAsGuest = () => {
@@ -326,8 +962,8 @@ const AuthScreen = ({ onAuth }) => {
           <div className="input-with-icon">
             <UserPlus size={16} className="input-icon" />
             <input
-              value={name}
-              onChange={(e) => setName(e.target.value)}
+              value={patientName}
+              onChange={(e) => setPatientName(e.target.value)}
               placeholder="e.g. Ananya Rao"
               className="field-input with-icon"
             />
@@ -370,49 +1006,149 @@ const AuthScreen = ({ onAuth }) => {
 };
 
 /* ---------------------------------------------------------------------- */
-/*  Packages + confirmation                                                */
+/*  Packages Screen with WhatsApp                                        */
 /* ---------------------------------------------------------------------- */
 
-const PackagesScreen = ({ onChoose, onSkip }) => (
-  <div className="packages-page fade-in-up">
-    <div className="packages-header">
-      <h1 className="font-display page-title">Pick a care plan</h1>
-      <p className="page-sub">Choose what fits you — you can switch plans anytime.</p>
-    </div>
-    <div className="packages-grid">
-      {PACKAGES.map((p) => (
-        <div key={p.id} className={`card package-card ${p.highlight ? "highlight" : ""}`}>
-          {p.highlight && (
-            <span className="package-badge">
-              <Star size={12} /> Most popular
-            </span>
-          )}
-          <p className="package-name font-display">{p.name}</p>
-          <p className="package-price">{p.price}</p>
-          <p className="package-tagline">{p.tagline}</p>
-          <ul className="package-features">
-            {p.features.map((f) => (
-              <li key={f}>
-                <Check size={14} className="package-check" /> {f}
-              </li>
-            ))}
-          </ul>
-          <button
-            className={p.highlight ? "btn-primary package-btn" : "btn-outline package-btn"}
-            onClick={() => onChoose(p)}
-          >
-            Choose {p.name}
+const PackagesScreen = ({ onChoose, onSkip, patientName }) => {
+  const [selectedPackage, setSelectedPackage] = useState(null);
+  const [showWhatsAppModal, setShowWhatsAppModal] = useState(false);
+
+  const displayName = patientName && patientName.trim() !== "" ? patientName.trim() : "Guest";
+
+  const handleWhatsAppEnquiry = (pkg) => {
+    setSelectedPackage(pkg);
+    setShowWhatsAppModal(true);
+  };
+
+  const confirmWhatsApp = () => {
+    if (selectedPackage) {
+      sendWhatsAppEnquiry(selectedPackage.name, patientName || "Guest Patient");
+      setShowWhatsAppModal(false);
+      setSelectedPackage(null);
+    }
+  };
+
+  return (
+    <>
+      <div className="packages-page fade-in-up">
+        <div className="packages-header">
+          <div className="packages-header-badge">
+            <Shield size={16} />
+            Choose Your Care Plan
+          </div>
+          <h1 className="font-display page-title">Pick a care plan</h1>
+          <p className="page-sub">Choose what fits you — you can switch plans anytime.</p>
+          <div className="patient-name-display-wrapper">
+            <p className="patient-name-display">
+              👤 Patient: <strong>{displayName}</strong>
+            </p>
+          </div>
+        </div>
+        <div className="packages-grid">
+          {PACKAGES.map((p) => {
+            const Icon = p.icon || Heart;
+            return (
+              <div key={p.id} className={`card package-card ${p.highlight ? "highlight" : ""}`}>
+                {p.highlight && (
+                  <span className="package-badge">
+                    <Star size={12} /> Most popular
+                  </span>
+                )}
+                <div className={`package-icon-wrapper color-${p.color || "violet"}`}>
+                  <Icon size={24} />
+                </div>
+                <p className="package-name font-display">{p.name}</p>
+                <p className="package-price">{p.price}</p>
+                <p className="package-tagline">{p.tagline}</p>
+                <ul className="package-features">
+                  {p.features.map((f) => (
+                    <li key={f}>
+                      <Check size={14} className="package-check" /> {f}
+                    </li>
+                  ))}
+                </ul>
+                <div className="package-buttons">
+                  <button
+                    className={p.highlight ? "btn-primary package-btn" : "btn-outline package-btn"}
+                    onClick={() => onChoose(p)}
+                  >
+                    Choose {p.name}
+                  </button>
+                  <button
+                    className="whatsapp-enquiry-btn"
+                    onClick={() => handleWhatsAppEnquiry(p)}
+                  >
+                    <MessageCircle size={16} />
+                    Enquire on WhatsApp
+                  </button>
+                </div>
+                <div className="package-contact-info">
+                  <small>
+                    <Phone size={12} /> Need help? Contact us on WhatsApp
+                  </small>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+        <div style={{ textAlign: "center", marginTop: 24 }}>
+          <button className="stat-cta" style={{ margin: "0 auto" }} onClick={onSkip}>
+            Skip for now — take me to Symptra <ChevronRight size={14} />
           </button>
         </div>
-      ))}
-    </div>
-    <div style={{ textAlign: "center", marginTop: 24 }}>
-      <button className="stat-cta" style={{ margin: "0 auto" }} onClick={onSkip}>
-        Skip for now — take me to Symptra <ChevronRight size={14} />
-      </button>
-    </div>
-  </div>
-);
+      </div>
+
+      {/* WhatsApp Confirmation Modal */}
+      {showWhatsAppModal && selectedPackage && (
+        <div className="modal-overlay" onClick={() => setShowWhatsAppModal(false)}>
+          <div className="modal-card" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-header">
+              <MessageCircle size={20} style={{ color: '#25D366' }} />
+              <h3 className="modal-title">WhatsApp Enquiry</h3>
+              <button className="modal-close-btn" onClick={() => setShowWhatsAppModal(false)}>×</button>
+            </div>
+            <div className="modal-body">
+              <p className="modal-sub">
+                You are about to enquire about the <strong>{selectedPackage.name}</strong> package via WhatsApp.
+              </p>
+              <div className="patient-info-box">
+                <UserPlus size={14} />
+                <span>
+                  <strong>Patient Name:</strong> {displayName}
+                </span>
+              </div>
+              <div className="whatsapp-info">
+                <Phone size={14} />
+                <span>WhatsApp: +91 9633228352</span>
+              </div>
+              <div className="whatsapp-preview">
+                <p className="preview-label">📨 Message Preview:</p>
+                <div className="preview-message">
+                  Hi! 👋 I'm interested in the {selectedPackage.name} package.
+                  <br />
+                  My name: {displayName}
+                  <br />
+                  Can you please provide more details about the features and pricing?
+                </div>
+              </div>
+            </div>
+            <button className="btn-primary whatsapp-send-btn" onClick={confirmWhatsApp}>
+              <MessageCircle size={16} />
+              Send WhatsApp Message
+            </button>
+            <button className="modal-cancel" onClick={() => setShowWhatsAppModal(false)}>
+              Cancel
+            </button>
+          </div>
+        </div>
+      )}
+    </>
+  );
+};
+
+/* ---------------------------------------------------------------------- */
+/*  Confirmation Screen                                                   */
+/* ---------------------------------------------------------------------- */
 
 const ConfirmationScreen = ({ pkg, onConfirm, onBack }) => (
   <div className="confirmation-page fade-in-up">
@@ -454,18 +1190,20 @@ const ConfirmationScreen = ({ pkg, onConfirm, onBack }) => (
 );
 
 /* ---------------------------------------------------------------------- */
-/*  Sidebar / Topbar                                                       */
+/*  Sidebar / Topbar                                                      */
 /* ---------------------------------------------------------------------- */
 
 const NAV_ITEMS = {
   patient: [
     { key: "landing", label: "Overview", icon: LayoutDashboard },
     { key: "checker", label: "Symptom Checker", icon: Activity },
+    { key: "diseaseLibrary", label: "Disease Library", icon: Microscope },
     { key: "patientDashboard", label: "My Health", icon: FileText },
   ],
   doctor: [
     { key: "landing", label: "Overview", icon: LayoutDashboard },
     { key: "checker", label: "Symptom Checker", icon: Activity },
+    { key: "diseaseLibrary", label: "Disease Library", icon: Microscope },
     { key: "doctorDashboard", label: "Clinic Dashboard", icon: Stethoscope },
   ],
 };
@@ -533,6 +1271,7 @@ const TopBar = ({ role, name, setMobileOpen, alertCount, onLogout }) => (
         <Menu size={24} />
       </button>
       <span className="role-pill">{role === "doctor" ? "Doctor account" : "Patient account"}</span>
+      <span className="user-name-display">👤 {name}</span>
     </div>
     <div className="topbar-right">
       <div className="bell-wrap">
@@ -552,7 +1291,7 @@ const TopBar = ({ role, name, setMobileOpen, alertCount, onLogout }) => (
 );
 
 /* ---------------------------------------------------------------------- */
-/*  Landing                                                                */
+/*  Landing Page                                                          */
 /* ---------------------------------------------------------------------- */
 
 const Landing = ({ setView, onChoosePackage }) => (
@@ -621,31 +1360,37 @@ const Landing = ({ setView, onChoosePackage }) => (
         Choose what fits you — you can switch plans anytime.
       </p>
       <div className="packages-grid">
-        {PACKAGES.map((p) => (
-          <div key={p.id} className={`card package-card ${p.highlight ? "highlight" : ""}`}>
-            {p.highlight && (
-              <span className="package-badge">
-                <Star size={12} /> Most popular
-              </span>
-            )}
-            <p className="package-name font-display">{p.name}</p>
-            <p className="package-price">{p.price}</p>
-            <p className="package-tagline">{p.tagline}</p>
-            <ul className="package-features">
-              {p.features.map((f) => (
-                <li key={f}>
-                  <Check size={14} className="package-check" /> {f}
-                </li>
-              ))}
-            </ul>
-            <button
-              className={p.highlight ? "btn-primary package-btn" : "btn-outline package-btn"}
-              onClick={() => onChoosePackage(p)}
-            >
-              Choose {p.name}
-            </button>
-          </div>
-        ))}
+        {PACKAGES.map((p) => {
+          const Icon = p.icon || Heart;
+          return (
+            <div key={p.id} className={`card package-card ${p.highlight ? "highlight" : ""}`}>
+              {p.highlight && (
+                <span className="package-badge">
+                  <Star size={12} /> Most popular
+                </span>
+              )}
+              <div className={`package-icon-wrapper color-${p.color || "violet"}`}>
+                <Icon size={24} />
+              </div>
+              <p className="package-name font-display">{p.name}</p>
+              <p className="package-price">{p.price}</p>
+              <p className="package-tagline">{p.tagline}</p>
+              <ul className="package-features">
+                {p.features.map((f) => (
+                  <li key={f}>
+                    <Check size={14} className="package-check" /> {f}
+                  </li>
+                ))}
+              </ul>
+              <button
+                className={p.highlight ? "btn-primary package-btn" : "btn-outline package-btn"}
+                onClick={() => onChoosePackage(p)}
+              >
+                Choose {p.name}
+              </button>
+            </div>
+          );
+        })}
       </div>
     </section>
 
@@ -669,48 +1414,314 @@ const Landing = ({ setView, onChoosePackage }) => (
 );
 
 /* ---------------------------------------------------------------------- */
-/*  Symptom Checker                                                        */
+/*  Disease Library Component                                             */
 /* ---------------------------------------------------------------------- */
 
-const EXAMPLES = [
-  "Fever, sore throat, and cough for 2 days",
-  "Sharp lower right belly pain since morning",
-  "Itchy red rash on both arms after gardening",
-  "Dizzy when standing up, tired for a week",
-];
+const DiseaseLibrary = ({ patientName }) => {
+  const [searchTerm, setSearchTerm] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState("All");
+  const [selectedDisease, setSelectedDisease] = useState(null);
+
+  const categories = ["All", ...new Set(DISEASE_DATABASE.map(d => d.category))];
+  
+  // Improved search with alphabetical ordering
+  const filteredDiseases = searchTerm.trim().length >= 2 
+    ? searchDiseases(searchTerm)
+    : DISEASE_DATABASE;
+  
+  // Further filter by category and sort alphabetically
+  const sortedDiseases = filteredDiseases
+    .filter(d => selectedCategory === "All" || d.category === selectedCategory)
+    .sort((a, b) => a.disease.localeCompare(b.disease));
+
+  return (
+    <div className="page-wide fade-in-up">
+      <h1 className="font-display page-title">Disease Library</h1>
+      <p className="page-sub">Browse our comprehensive database of 60+ diseases and conditions.</p>
+      
+      {patientName && (
+        <div className="patient-name-display-wrapper" style={{ marginBottom: 16 }}>
+          <p className="patient-name-display">
+            👤 Patient: <strong>{patientName}</strong>
+          </p>
+        </div>
+      )}
+
+      <div className="disease-library-controls">
+        <div className="search-wrap">
+          <Search size={16} className="search-icon" />
+          <input
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            placeholder="Search diseases or symptoms (min 2 characters)..."
+            className="search-input"
+          />
+          {searchTerm.length >= 2 && (
+            <span className="search-result-count">
+              {sortedDiseases.length} results found
+            </span>
+          )}
+        </div>
+        <div className="category-filters">
+          {categories.map(cat => (
+            <button
+              key={cat}
+              className={`category-filter ${selectedCategory === cat ? "active" : ""}`}
+              onClick={() => setSelectedCategory(cat)}
+            >
+              {cat}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      <div className="disease-grid">
+        {sortedDiseases.map(disease => (
+          <div key={disease.id} className="card disease-card" onClick={() => setSelectedDisease(disease)}>
+            <div className="disease-card-header">
+              <h3 className="disease-name">{disease.disease}</h3>
+              <UrgencyBadge level={disease.urgency} size="sm" />
+            </div>
+            <p className="disease-description">{disease.description}</p>
+            <div className="disease-symptoms">
+              <span className="symptoms-label">Symptoms:</span>
+              {disease.symptoms.slice(0, 4).map(s => (
+                <span key={s} className="symptom-tag-sm">{s}</span>
+              ))}
+              {disease.symptoms.length > 4 && (
+                <span className="symptom-more">+{disease.symptoms.length - 4} more</span>
+              )}
+            </div>
+            <div className="disease-category">
+              <span className="category-label">{disease.category}</span>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {sortedDiseases.length === 0 && searchTerm.length >= 2 && (
+        <div className="empty-state">
+          <p>No diseases found matching "{searchTerm}". Try different keywords.</p>
+        </div>
+      )}
+
+      {sortedDiseases.length === 0 && searchTerm.length < 2 && (
+        <div className="empty-state">
+          <p>Type at least 2 characters to search for diseases or symptoms.</p>
+        </div>
+      )}
+
+      {/* Disease Detail Modal */}
+      {selectedDisease && (
+        <div className="modal-overlay" onClick={() => setSelectedDisease(null)}>
+          <div className="modal-card disease-detail-modal" onClick={(e) => e.stopPropagation()}>
+            <button className="modal-close" onClick={() => setSelectedDisease(null)}>×</button>
+            <h2 className="disease-detail-name">{selectedDisease.disease}</h2>
+            <UrgencyBadge level={selectedDisease.urgency} />
+            <p className="disease-detail-description">{selectedDisease.description}</p>
+            <div className="disease-detail-section">
+              <h4>Symptoms</h4>
+              <div className="symptom-tags">
+                {selectedDisease.symptoms.map(s => (
+                  <span key={s} className="symptom-tag">{s}</span>
+                ))}
+              </div>
+            </div>
+            <div className="disease-detail-section">
+              <h4>Common Treatments</h4>
+              <ul className="treatment-list">
+                {selectedDisease.commonTreatments.map(t => (
+                  <li key={t}>{t}</li>
+                ))}
+              </ul>
+            </div>
+            <div className="disease-detail-section">
+              <h4>Prevention</h4>
+              <ul className="prevention-list">
+                {selectedDisease.prevention.map(p => (
+                  <li key={p}>{p}</li>
+                ))}
+              </ul>
+            </div>
+            <div className="disease-detail-section">
+              <h4>Category</h4>
+              <span className="category-label">{selectedDisease.category}</span>
+            </div>
+            <button className="btn-primary whatsapp-consult-btn" onClick={() => {
+              sendWhatsAppEnquiry("Disease Consultation", patientName || "Guest Patient", "consultation");
+            }}>
+              <MessageCircle size={16} />
+              Consult a Doctor on WhatsApp
+            </button>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
+
+/* ---------------------------------------------------------------------- */
+/*  Symptom Checker with Enhanced Search                                  */
+/* ---------------------------------------------------------------------- */
+
+const SymptomSearchInput = ({ value, onChange, onSelect }) => {
+  const [suggestions, setSuggestions] = useState([]);
+  const [showSuggestions, setShowSuggestions] = useState(false);
+  const [selectedIndex, setSelectedIndex] = useState(-1);
+  const inputRef = useRef(null);
+  const suggestionsRef = useRef(null);
+
+  const allSymptoms = getAllSymptoms();
+
+  const handleInputChange = (e) => {
+    const val = e.target.value;
+    onChange(val);
+    
+    if (val.trim().length > 0) {
+      const searchTerm = val.toLowerCase().trim();
+      const filtered = allSymptoms
+        .filter(s => s.toLowerCase().includes(searchTerm))
+        .slice(0, 20);
+      setSuggestions(filtered);
+      setShowSuggestions(true);
+      setSelectedIndex(-1);
+    } else {
+      setSuggestions([]);
+      setShowSuggestions(false);
+    }
+  };
+
+  const handleSelect = (symptom) => {
+    onSelect(symptom);
+    setShowSuggestions(false);
+    inputRef.current?.focus();
+  };
+
+  const handleKeyDown = (e) => {
+    if (e.key === 'ArrowDown') {
+      e.preventDefault();
+      setSelectedIndex(prev => Math.min(prev + 1, suggestions.length - 1));
+    } else if (e.key === 'ArrowUp') {
+      e.preventDefault();
+      setSelectedIndex(prev => Math.max(prev - 1, -1));
+    } else if (e.key === 'Enter' && selectedIndex >= 0) {
+      e.preventDefault();
+      handleSelect(suggestions[selectedIndex]);
+    } else if (e.key === 'Escape') {
+      setShowSuggestions(false);
+    }
+  };
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (suggestionsRef.current && !suggestionsRef.current.contains(event.target) &&
+          inputRef.current && !inputRef.current.contains(event.target)) {
+        setShowSuggestions(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  return (
+    <div style={{ position: 'relative' }}>
+      <input
+        ref={inputRef}
+        value={value}
+        onChange={handleInputChange}
+        onKeyDown={handleKeyDown}
+        onFocus={() => value.trim().length > 0 && suggestions.length > 0 && setShowSuggestions(true)}
+        placeholder="Start typing symptoms (e.g., cough, fever, headache)..."
+        className="field-input symptom-search-input"
+        style={{ paddingRight: '40px' }}
+      />
+      <Search size={18} style={{ position: 'absolute', right: '12px', top: '50%', transform: 'translateY(-50%)', color: 'var(--slate-400)' }} />
+      
+      {showSuggestions && suggestions.length > 0 && (
+        <div ref={suggestionsRef} className="suggestions-dropdown">
+          {suggestions.map((symptom, index) => (
+            <button
+              key={symptom}
+              className={`suggestion-item ${index === selectedIndex ? 'active' : ''}`}
+              onClick={() => handleSelect(symptom)}
+              onMouseEnter={() => setSelectedIndex(index)}
+            >
+              <span className="symptom-icon">🔍</span>
+              {symptom}
+              <span className="symptom-count">{DISEASE_DATABASE.filter(d => d.symptoms.includes(symptom)).length} diseases</span>
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+};
 
 const SymptomChecker = ({ onSaveCheck, currentName }) => {
-  const [name, setName] = useState(currentName || "");
+  const [patientName, setPatientName] = useState(currentName || "");
   const [text, setText] = useState("");
+  const [symptoms, setSymptoms] = useState([]);
+  const [symptomInput, setSymptomInput] = useState("");
+  const [searchResults, setSearchResults] = useState([]);
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState(null);
   const [error, setError] = useState("");
   const [saved, setSaved] = useState(false);
   const [usedFallback, setUsedFallback] = useState(false);
 
-  const analyze = async () => {
-    if (!text.trim()) return;
+  const addSymptom = (symptom) => {
+    if (!symptoms.includes(symptom)) {
+      setSymptoms([...symptoms, symptom]);
+      setSymptomInput("");
+      performSearch([...symptoms, symptom]);
+    }
+  };
+
+  const removeSymptom = (symptom) => {
+    const newSymptoms = symptoms.filter(s => s !== symptom);
+    setSymptoms(newSymptoms);
+    performSearch(newSymptoms);
+  };
+
+  const performSearch = (symptomList) => {
+    if (symptomList.length === 0) {
+      setSearchResults([]);
+      return;
+    }
+    
+    const query = symptomList.join(" ");
+    // Fix: Use the correct function name 'searchDiseases'
+    const results = searchDiseases(query);
+    setSearchResults(results);
+  };
+
+  const clearAllSymptoms = () => {
+    setSymptoms([]);
+    setSearchResults([]);
+  };
+
+  const analyzeWithSymptoms = async () => {
+    if (symptoms.length === 0) {
+      setError("Please add at least one symptom first.");
+      return;
+    }
+
+    const description = symptoms.join(", ");
+    setText(description);
     setLoading(true);
     setError("");
     setResult(null);
     setSaved(false);
     setUsedFallback(false);
 
-    const systemPrompt = `You are a clinical triage assistant embedded in a clinic's intake software. Given a patient's described symptoms, respond with ONLY a JSON object — no markdown, no code fences, no preamble — matching exactly this schema:
+    const systemPrompt = `You are a clinical triage assistant. Given symptoms, respond with ONLY a JSON object:
 {
   "urgency": "emergency" | "urgent" | "routine" | "self-care",
-  "conditions": [ { "name": string, "likelihood": "high" | "moderate" | "low", "description": string (max 20 words) } ],
+  "conditions": [ { "name": string, "likelihood": "high" | "moderate" | "low", "description": string } ],
   "redFlags": [string],
-  "recommendedAction": string (max 25 words, plain language),
-  "disclaimer": "This is not a diagnosis. Please consult a licensed doctor for confirmation and treatment."
-}
-Rules:
-- Return 2 to 4 conditions, most likely first.
-- redFlags lists concerning signs actually present in the input; return an empty array if none.
-- If symptoms suggest a medical emergency (e.g. chest pain, trouble breathing, stroke signs, severe bleeding, suicidal ideation), set urgency to "emergency" and recommendedAction must tell the person to seek emergency care or call emergency services immediately.
-- Never include specific drug names or dosages.
-- When uncertain, lean toward the higher urgency level.
-- Output valid JSON only, nothing else.`;
+  "recommendedAction": string,
+  "disclaimer": "This is not a diagnosis. Please consult a licensed doctor."
+}`;
 
     let parsed = null;
 
@@ -726,7 +1737,7 @@ Rules:
           model: "claude-sonnet-4-6",
           max_tokens: 1000,
           system: systemPrompt,
-          messages: [{ role: "user", content: text }],
+          messages: [{ role: "user", content: description }],
         }),
       });
       clearTimeout(timeout);
@@ -745,10 +1756,20 @@ Rules:
         throw new Error("Malformed response");
       }
     } catch (e) {
-      // AI call failed, timed out, or returned something unusable —
-      // fall back to a local keyword-based reference so the person
-      // still gets a useful read instead of a dead end.
-      parsed = localSymptomMatch(text);
+      // Fallback to local matching - diseases appear at top
+      parsed = {
+        urgency: searchResults.length > 0 ? searchResults[0].urgency : "routine",
+        conditions: searchResults.slice(0, 3).map(d => ({
+          name: d.disease,
+          likelihood: "moderate",
+          description: d.description
+        })),
+        redFlags: searchResults.filter(d => d.urgency === "emergency").map(d => d.disease),
+        recommendedAction: searchResults.length > 0 ? 
+          `Consider consulting a doctor for ${searchResults[0].disease}.` : 
+          "Book a routine check-up.",
+        disclaimer: "This is not a diagnosis. Please consult a licensed doctor."
+      };
       setUsedFallback(true);
     }
 
@@ -759,8 +1780,8 @@ Rules:
   const save = () => {
     if (!result) return;
     onSaveCheck({
-      patientName: name.trim() || "Guest patient",
-      symptomsText: text,
+      patientName: patientName.trim() || "Guest patient",
+      symptomsText: text || symptoms.join(", "),
       result,
     });
     setSaved(true);
@@ -770,36 +1791,88 @@ Rules:
     <div className="page-narrow fade-in-up">
       <h1 className="font-display page-title">Symptom Checker</h1>
       <p className="page-sub">
-        Describe what you're feeling in your own words. The more detail, the sharper the read.
+        Type your symptoms below. The search will suggest matching diseases and conditions.
       </p>
 
       <div className="card checker-form">
         <label className="field-label">Your name</label>
         <input
-          value={name}
-          onChange={(e) => setName(e.target.value)}
+          value={patientName}
+          onChange={(e) => setPatientName(e.target.value)}
           placeholder="e.g. Ananya Rao"
           className="field-input"
         />
 
-        <label className="field-label">Symptoms</label>
-        <textarea
-          value={text}
-          onChange={(e) => setText(e.target.value)}
-          placeholder="Example: I have a fever, headache, sore throat, and cough for 2 days..."
-          rows={5}
-          className="field-textarea"
+        <label className="field-label">Add symptoms</label>
+        <SymptomSearchInput 
+          value={symptomInput}
+          onChange={setSymptomInput}
+          onSelect={addSymptom}
         />
+        
+        <div className="symptom-tags">
+          {symptoms.map((symptom) => (
+            <span key={symptom} className="symptom-tag">
+              {symptom}
+              <button onClick={() => removeSymptom(symptom)} className="symptom-tag-remove">×</button>
+            </span>
+          ))}
+          {symptoms.length === 0 && (
+            <span className="symptom-placeholder">No symptoms added yet. Type to add.</span>
+          )}
+          {symptoms.length > 0 && (
+            <button onClick={clearAllSymptoms} className="clear-symptoms-btn">
+              Clear all
+            </button>
+          )}
+        </div>
 
-        <div className="example-chips">
-          {EXAMPLES.map((ex) => (
-            <button key={ex} onClick={() => setText(ex)} className="chip">
-              {ex}
+        {symptoms.length > 0 && (
+          <div className="search-results-section">
+            <h4 className="search-results-title">
+              {searchResults.length > 0 ? `Possible conditions (${searchResults.length} found)` : "Searching..."}
+            </h4>
+            <div className="search-results-list">
+              {searchResults.slice(0, 10).map((result, index) => (
+                <div key={index} className={`search-result-item urgency-${result.urgency}`}>
+                  <div className="search-result-header">
+                    <span className="search-result-disease">{result.disease}</span>
+                    <span className={`search-result-urgency ${result.urgency}`}>
+                      {result.urgency}
+                    </span>
+                  </div>
+                  <p className="search-result-desc">{result.description}</p>
+                  <div className="search-result-symptoms">
+                    <span>Matched: </span>
+                    {result.matchedSymptoms.map(s => (
+                      <span key={s} className="search-result-matched-symptom">{s}</span>
+                    ))}
+                  </div>
+                </div>
+              ))}
+              {searchResults.length > 10 && (
+                <div className="search-result-more">
+                  +{searchResults.length - 10} more conditions
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
+        <div className="example-chips" style={{ marginTop: 12 }}>
+          <span style={{ fontSize: '12px', color: 'var(--slate-400)', marginRight: 4 }}>Quick add: </span>
+          {["cough", "fever", "headache", "chest pain", "nausea"].map((s) => (
+            <button key={s} onClick={() => addSymptom(s)} className="chip">
+              {s}
             </button>
           ))}
         </div>
 
-        <button onClick={analyze} disabled={loading || !text.trim()} className="btn-primary analyze-btn">
+        <button 
+          onClick={analyzeWithSymptoms} 
+          disabled={loading || symptoms.length === 0} 
+          className="btn-primary analyze-btn"
+        >
           {loading ? (
             <>
               <span className="beat-loader">
@@ -807,7 +1880,7 @@ Rules:
                   <span key={i} style={{ animationDelay: `${i * 0.12}s` }} className="beat-bar" />
                 ))}
               </span>
-              Reading your symptoms…
+              Analyzing symptoms…
             </>
           ) : (
             <>
@@ -816,6 +1889,9 @@ Rules:
           )}
         </button>
         {error && <p className="error-text">{error}</p>}
+        {symptoms.length > 0 && (
+          <p className="symptom-count-hint">{symptoms.length} symptom{symptoms.length > 1 ? 's' : ''} selected</p>
+        )}
       </div>
 
       {result && (
@@ -858,18 +1934,27 @@ Rules:
 
           <p className="disclaimer-text">
             {result.disclaimer}
-            {usedFallback && " · Estimated from an offline reference because the AI service didn't respond — for a sharper read, try analyzing again."}
+            {usedFallback && " · Estimated from offline database."}
           </p>
 
-          <button onClick={save} disabled={saved} className="btn-outline send-doctor-btn">
-            {saved ? (
-              <>
-                <CheckCircle2 size={16} /> Sent to your clinic
-              </>
-            ) : (
-              <>Send this to my doctor</>
-            )}
-          </button>
+          <div className="result-actions">
+            <button onClick={save} disabled={saved} className="btn-outline send-doctor-btn">
+              {saved ? (
+                <>
+                  <CheckCircle2 size={16} /> Sent to your clinic
+                </>
+              ) : (
+                <>Send this to my doctor</>
+              )}
+            </button>
+            <button className="btn-primary whatsapp-consult-btn" onClick={() => {
+              const name = patientName || "Guest Patient";
+              sendWhatsAppEnquiry("", name, "consultation");
+            }}>
+              <MessageCircle size={16} />
+              Consult Doctor on WhatsApp
+            </button>
+          </div>
         </div>
       )}
     </div>
@@ -877,7 +1962,7 @@ Rules:
 };
 
 /* ---------------------------------------------------------------------- */
-/*  Patient Dashboard                                                       */
+/*  Patient Dashboard                                                     */
 /* ---------------------------------------------------------------------- */
 
 const PatientDashboard = ({ checks, name, pkg, onChangePlan }) => {
@@ -893,8 +1978,9 @@ const PatientDashboard = ({ checks, name, pkg, onChangePlan }) => {
         <div className="card stat-card">
           <p className="stat-label">Next appointment</p>
           <p className="font-display stat-value">Not yet booked</p>
-          <button className="stat-cta">
-            Book a slot <ChevronRight size={14} />
+          <button className="stat-cta" onClick={() => sendWhatsAppEnquiry("", name || "Guest Patient", "appointment")}>
+            <MessageCircle size={14} />
+            Book via WhatsApp
           </button>
         </div>
         <div className="card stat-card">
@@ -954,7 +2040,7 @@ const PatientDashboard = ({ checks, name, pkg, onChangePlan }) => {
 };
 
 /* ---------------------------------------------------------------------- */
-/*  Doctor Dashboard                                                        */
+/*  Doctor Dashboard                                                       */
 /* ---------------------------------------------------------------------- */
 
 const urgencyRank = { emergency: 0, urgent: 1, routine: 2, "self-care": 3 };
@@ -975,9 +2061,9 @@ const DoctorDashboard = ({ checks, patients, onReview }) => {
 
   const stats = [
     { label: "Total patients", value: patients.length, icon: Users },
-    { label: "Pending AI reviews", value: pending, icon: Clock },
+    { label: "Pending reviews", value: pending, icon: Clock },
     { label: "Emergency flags", value: emergencies, icon: ShieldAlert },
-    { label: "Avg. response", value: "8 min", icon: Activity },
+    { label: "Diseases in DB", value: DISEASE_DATABASE.length, icon: Microscope },
   ];
 
   return (
@@ -1105,12 +2191,12 @@ const DoctorDashboard = ({ checks, patients, onReview }) => {
 };
 
 /* ---------------------------------------------------------------------- */
-/*  Root App                                                                */
+/*  Root App                                                               */
 /* ---------------------------------------------------------------------- */
 
 export default function App() {
   const [authenticated, setAuthenticated] = useState(false);
-  const [view, setView] = useState("login"); // login | packages | confirmation | landing | checker | patientDashboard | doctorDashboard
+  const [view, setView] = useState("login");
   const [role, setRole] = useState("patient");
   const [mobileOpen, setMobileOpen] = useState(false);
   const [patients] = useState(MOCK_PATIENTS);
@@ -1147,7 +2233,6 @@ export default function App() {
     if (authRole === "doctor") {
       setView("doctorDashboard");
     } else {
-      // Guests skip straight in — real signups see plans first, but can skip too.
       setView(guest ? "landing" : "packages");
     }
   };
@@ -1175,6 +2260,7 @@ export default function App() {
           setView("confirmation");
         }}
         onSkip={() => setView("landing")}
+        patientName={activeName}
       />
     );
   } else if (view === "confirmation" && pendingPackage) {
@@ -1206,6 +2292,7 @@ export default function App() {
               />
             )}
             {view === "checker" && <SymptomChecker onSaveCheck={handleSaveCheck} currentName={activeName} />}
+            {view === "diseaseLibrary" && <DiseaseLibrary patientName={activeName} />}
             {view === "patientDashboard" && (
               <PatientDashboard
                 checks={checks}
@@ -1220,6 +2307,8 @@ export default function App() {
           </main>
           <footer className="app-footer">
             © 2026 Symptra · AI-assisted triage, not a substitute for professional medical advice.
+            <br />
+            <small>📞 Contact us on WhatsApp: +91 9633228352</small>
           </footer>
         </div>
       </div>

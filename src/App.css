@@ -927,6 +927,254 @@ button {
 }
 
 /* ---------------------------------------------------------------------- */
+/*  Symptom Search Styles                                                 */
+/* ---------------------------------------------------------------------- */
+
+.symptom-search-input {
+  padding-right: 40px;
+}
+
+.suggestions-dropdown {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background: var(--white);
+  border: 1px solid var(--slate-200);
+  border-radius: 12px;
+  max-height: 300px;
+  overflow-y: auto;
+  z-index: 100;
+  margin-top: 4px;
+  box-shadow: 0 10px 40px rgba(0,0,0,0.12);
+}
+
+.suggestion-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 16px;
+  width: 100%;
+  text-align: left;
+  font-size: 14px;
+  color: var(--slate-700);
+  transition: background-color 0.1s;
+  border-bottom: 1px solid var(--slate-100);
+}
+
+.suggestion-item:last-child {
+  border-bottom: none;
+}
+
+.suggestion-item:hover,
+.suggestion-item.active {
+  background: var(--violet-50);
+  color: var(--violet-700);
+}
+
+.suggestion-item .symptom-icon {
+  font-size: 16px;
+}
+
+.suggestion-item .symptom-count {
+  margin-left: auto;
+  font-size: 11px;
+  color: var(--slate-400);
+}
+
+.symptom-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 12px 0;
+  min-height: 48px;
+  align-items: center;
+}
+
+.symptom-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--violet-50);
+  color: var(--violet-700);
+  padding: 6px 12px;
+  border-radius: 999px;
+  font-size: 13px;
+  font-weight: 500;
+  border: 1px solid var(--violet-200);
+  animation: fadeInUp 0.2s ease;
+}
+
+.symptom-tag-remove {
+  background: none;
+  border: none;
+  color: var(--violet-400);
+  font-size: 16px;
+  cursor: pointer;
+  padding: 0 4px;
+  transition: color 0.15s;
+}
+
+.symptom-tag-remove:hover {
+  color: var(--red-600);
+}
+
+.symptom-placeholder {
+  color: var(--slate-400);
+  font-size: 13px;
+}
+
+.clear-symptoms-btn {
+  margin-left: auto;
+  font-size: 12px;
+  color: var(--red-500);
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 4px;
+  transition: background-color 0.15s;
+}
+
+.clear-symptoms-btn:hover {
+  background: var(--red-50);
+}
+
+.symptom-count-hint {
+  font-size: 12px;
+  color: var(--slate-400);
+  margin-top: 8px;
+  text-align: center;
+}
+
+/* Search Results Section */
+
+.search-results-section {
+  margin-top: 16px;
+  border-top: 1px solid var(--slate-100);
+  padding-top: 16px;
+}
+
+.search-results-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--slate-700);
+  margin-bottom: 12px;
+}
+
+.search-results-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-height: 400px;
+  overflow-y: auto;
+}
+
+.search-result-item {
+  padding: 12px 16px;
+  border-radius: 10px;
+  border: 1px solid var(--slate-200);
+  background: var(--white);
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+.search-result-item:hover {
+  border-color: var(--violet-300);
+  box-shadow: 0 4px 12px rgba(139, 92, 246, 0.08);
+}
+
+.search-result-item.urgency-emergency {
+  border-left: 4px solid var(--red-500);
+}
+
+.search-result-item.urgency-urgent {
+  border-left: 4px solid var(--amber-500);
+}
+
+.search-result-item.urgency-routine {
+  border-left: 4px solid var(--violet-500);
+}
+
+.search-result-item.urgency-self-care {
+  border-left: 4px solid var(--emerald-500);
+}
+
+.search-result-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.search-result-disease {
+  font-weight: 600;
+  color: var(--slate-900);
+  font-size: 14px;
+}
+
+.search-result-urgency {
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding: 2px 10px;
+  border-radius: 999px;
+}
+
+.search-result-urgency.emergency {
+  background: var(--red-50);
+  color: var(--red-700);
+}
+
+.search-result-urgency.urgent {
+  background: var(--amber-50);
+  color: var(--amber-700);
+}
+
+.search-result-urgency.routine {
+  background: var(--violet-50);
+  color: var(--violet-700);
+}
+
+.search-result-urgency.self-care {
+  background: var(--emerald-50);
+  color: var(--emerald-700);
+}
+
+.search-result-desc {
+  font-size: 13px;
+  color: var(--slate-500);
+  margin-top: 4px;
+  line-height: 1.4;
+}
+
+.search-result-symptoms {
+  font-size: 11px;
+  color: var(--slate-400);
+  margin-top: 6px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex-wrap: wrap;
+}
+
+.search-result-matched-symptom {
+  background: var(--violet-50);
+  color: var(--violet-700);
+  padding: 1px 8px;
+  border-radius: 999px;
+  font-weight: 500;
+}
+
+.search-result-more {
+  text-align: center;
+  font-size: 12px;
+  color: var(--slate-400);
+  padding: 8px;
+  border-top: 1px dashed var(--slate-200);
+}
+
+/* ---------------------------------------------------------------------- */
 /*  Patient dashboard                                                       */
 /* ---------------------------------------------------------------------- */
 
@@ -1746,4 +1994,462 @@ button {
 .logout-btn:hover {
   background: var(--red-50);
   color: var(--red-600);
+}
+
+
+/* ---------------------------------------------------------------------- */
+/*  Enhanced Package Styles                                               */
+/* ---------------------------------------------------------------------- */
+
+.packages-header-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--violet-50);
+  color: var(--violet-700);
+  font-size: 12px;
+  font-weight: 600;
+  padding: 6px 16px;
+  border-radius: 999px;
+  margin-bottom: 16px;
+}
+
+.package-icon-wrapper {
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 12px;
+}
+
+.package-icon-wrapper.color-violet {
+  background: var(--violet-100);
+  color: var(--violet-700);
+}
+
+.package-icon-wrapper.color-emerald {
+  background: var(--emerald-50);
+  color: var(--emerald-600);
+}
+
+.package-icon-wrapper.color-amber {
+  background: var(--amber-50);
+  color: var(--amber-500);
+}
+
+.package-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.whatsapp-enquiry-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  background: #25D366;
+  color: white;
+  font-weight: 600;
+  padding: 10px 20px;
+  border-radius: 12px;
+  transition: background-color 0.15s, transform 0.15s;
+  width: 100%;
+}
+
+.whatsapp-enquiry-btn:hover {
+  background: #128C7E;
+  transform: translateY(-2px);
+}
+
+.package-contact-info {
+  margin-top: 12px;
+  text-align: center;
+  padding-top: 12px;
+  border-top: 1px solid var(--slate-100);
+}
+
+.package-contact-info small {
+  color: var(--slate-400);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+}
+
+/* ---------------------------------------------------------------------- */
+/*  Disease Library Styles                                                */
+/* ---------------------------------------------------------------------- */
+
+.disease-library-controls {
+  margin: 24px 0;
+}
+
+.category-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.category-filter {
+  padding: 6px 16px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--slate-600);
+  background: var(--slate-100);
+  transition: all 0.15s;
+}
+
+.category-filter:hover {
+  background: var(--violet-50);
+  color: var(--violet-700);
+}
+
+.category-filter.active {
+  background: var(--violet-700);
+  color: white;
+}
+
+.disease-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 16px;
+  margin-top: 16px;
+}
+
+@media (min-width: 768px) {
+  .disease-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+@media (min-width: 1024px) {
+  .disease-grid {
+    grid-template-columns: 1fr 1fr 1fr;
+  }
+}
+
+.disease-card {
+  padding: 16px;
+  cursor: pointer;
+  transition: transform 0.15s, box-shadow 0.15s;
+}
+
+.disease-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 24px rgba(139, 92, 246, 0.12);
+}
+
+.disease-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+
+.disease-name {
+  font-weight: 600;
+  color: var(--slate-900);
+  font-size: 16px;
+}
+
+.disease-description {
+  font-size: 14px;
+  color: var(--slate-500);
+  line-height: 1.5;
+  margin-bottom: 8px;
+}
+
+.disease-symptoms {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  align-items: center;
+}
+
+.symptoms-label {
+  font-size: 11px;
+  color: var(--slate-400);
+  margin-right: 4px;
+}
+
+.symptom-tag-sm {
+  background: var(--violet-50);
+  color: var(--violet-700);
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: 11px;
+}
+
+.symptom-more {
+  font-size: 11px;
+  color: var(--slate-400);
+}
+
+.disease-category {
+  margin-top: 8px;
+}
+
+.category-label {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--violet-700);
+  background: var(--violet-50);
+  padding: 2px 10px;
+  border-radius: 999px;
+}
+
+/* ---------------------------------------------------------------------- */
+/*  Disease Detail Modal                                                  */
+/* ---------------------------------------------------------------------- */
+
+.disease-detail-modal {
+  max-width: 500px;
+  max-height: 80vh;
+  overflow-y: auto;
+  position: relative;
+}
+
+.modal-close {
+  position: absolute;
+  top: 12px;
+  right: 16px;
+  font-size: 24px;
+  color: var(--slate-400);
+  background: none;
+  border: none;
+  cursor: pointer;
+  transition: color 0.15s;
+}
+
+.modal-close:hover {
+  color: var(--slate-800);
+}
+
+.disease-detail-name {
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--slate-900);
+  margin-bottom: 8px;
+}
+
+.disease-detail-description {
+  font-size: 14px;
+  color: var(--slate-600);
+  margin: 12px 0;
+  line-height: 1.6;
+}
+
+.disease-detail-section {
+  margin-top: 16px;
+}
+
+.disease-detail-section h4 {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--slate-700);
+  margin-bottom: 8px;
+}
+
+.treatment-list,
+.prevention-list {
+  list-style: none;
+  padding: 0;
+}
+
+.treatment-list li,
+.prevention-list li {
+  padding: 4px 0;
+  font-size: 14px;
+  color: var(--slate-600);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.treatment-list li::before,
+.prevention-list li::before {
+  content: "•";
+  color: var(--violet-500);
+  font-weight: bold;
+}
+
+/* ---------------------------------------------------------------------- */
+/*  WhatsApp Modal                                                        */
+/* ---------------------------------------------------------------------- */
+
+.modal-body {
+  padding: 8px 0;
+}
+
+.whatsapp-info {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: #f0fdf4;
+  padding: 12px;
+  border-radius: 8px;
+  margin-top: 12px;
+  color: #065f46;
+  font-weight: 500;
+}
+
+.whatsapp-send-btn {
+  width: 100%;
+  margin-top: 12px;
+  background: #25D366;
+}
+
+.whatsapp-send-btn:hover {
+  background: #128C7E;
+}
+
+.whatsapp-consult-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  background: #25D366;
+  color: white;
+  font-weight: 600;
+  padding: 12px 24px;
+  border-radius: 12px;
+  transition: background-color 0.15s, transform 0.15s;
+  width: 100%;
+}
+
+.whatsapp-consult-btn:hover {
+  background: #128C7E;
+  transform: translateY(-2px);
+}
+
+/* ---------------------------------------------------------------------- */
+/*  Result Actions                                                        */
+/* ---------------------------------------------------------------------- */
+
+.result-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 16px;
+}
+
+@media (min-width: 640px) {
+  .result-actions {
+    flex-direction: row;
+  }
+}
+
+.result-actions .send-doctor-btn,
+.result-actions .whatsapp-consult-btn {
+  flex: 1;
+}
+
+/* ---------------------------------------------------------------------- */
+/*  Patient Name Display Styles                                           */
+/* ---------------------------------------------------------------------- */
+
+.patient-name-display-wrapper {
+  display: flex;
+  justify-content: center;
+  margin: 8px 0 16px;
+}
+
+.patient-name-display {
+  font-size: 14px;
+  color: var(--slate-600);
+  background: var(--violet-50);
+  padding: 8px 20px;
+  border-radius: 999px;
+  display: inline-block;
+  margin: 0;
+}
+
+.patient-name-display strong {
+  color: var(--violet-700);
+}
+
+.user-name-display {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--violet-700);
+  background: var(--violet-50);
+  padding: 4px 12px;
+  border-radius: 999px;
+  margin-left: 8px;
+  display: none;
+}
+
+@media (min-width: 640px) {
+  .user-name-display {
+    display: inline-block;
+  }
+}
+
+/* ---------------------------------------------------------------------- */
+/*  Modal Close Button                                                    */
+/* ---------------------------------------------------------------------- */
+
+.modal-close-btn {
+  position: absolute;
+  top: 12px;
+  right: 16px;
+  font-size: 24px;
+  color: var(--slate-400);
+  background: none;
+  border: none;
+  cursor: pointer;
+  transition: color 0.15s;
+  line-height: 1;
+}
+
+.modal-close-btn:hover {
+  color: var(--slate-800);
+}
+
+/* Modal Header with close button */
+.modal-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  position: relative;
+  padding-right: 40px;
+}
+
+/* Make sure modal card has position relative */
+.modal-card {
+  position: relative;
+  background: var(--white);
+  border-radius: 16px;
+  padding: 28px 24px;
+  width: 100%;
+  max-width: 420px;
+  box-shadow: 0 20px 50px rgba(0,0,0,0.2);
+  max-height: 90vh;
+  overflow-y: auto;
+}
+
+/* WhatsApp Button in Results */
+.whatsapp-consult-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  background: #25D366;
+  color: white;
+  font-weight: 600;
+  padding: 12px 24px;
+  border-radius: 12px;
+  transition: background-color 0.15s, transform 0.15s;
+  width: 100%;
+}
+
+.whatsapp-consult-btn:hover {
+  background: #128C7E;
+  transform: translateY(-2px);
 }
