@@ -41,7 +41,7 @@ export const AuthScreen = ({ onAuth }) => {
             <input
               value={patientName}
               onChange={(e) => setPatientName(e.target.value)}
-              placeholder="e.g. Ananya Rao"
+              placeholder="e.g. Jissmon Poulose"
               className="field-input with-icon"
             />
           </div>

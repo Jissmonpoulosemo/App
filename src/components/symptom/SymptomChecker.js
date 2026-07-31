@@ -147,7 +147,7 @@ export const SymptomChecker = ({ onSaveCheck, currentName }) => {
         <input
           value={patientName}
           onChange={(e) => setPatientName(e.target.value)}
-          placeholder="e.g. Ananya Rao"
+          placeholder="e.g. Jiss Poulose"
           className="field-input"
         />
 

@@ -1,6 +1,6 @@
 export const MOCK_PATIENTS = [
-  { id: 1, name: "Ananya Rao", age: 29, gender: "F", avatar: "AR", tone: "violet", lastVisit: "2026-07-18" },
-  { id: 2, name: "Rahul Menon", age: 45, gender: "M", avatar: "RM", tone: "fuchsia", lastVisit: "2026-07-24" },
+  { id: 1, name: "Jiss", age: 29, gender: "F", avatar: "AR", tone: "violet", lastVisit: "2026-07-18" },
+  { id: 2, name: "Jissmon Poulose m o", age: 45, gender: "M", avatar: "RM", tone: "fuchsia", lastVisit: "2026-07-24" },
   { id: 3, name: "Priya Nair", age: 34, gender: "F", avatar: "PN", tone: "indigo", lastVisit: "2026-07-22" },
   { id: 4, name: "Thomas Varghese", age: 61, gender: "M", avatar: "TV", tone: "plum", lastVisit: "2026-07-15" },
   { id: 5, name: "Fathima Beevi", age: 52, gender: "F", avatar: "FB", tone: "violet", lastVisit: "2026-07-10" },
@@ -53,7 +53,7 @@ export const INITIAL_CHECKS = [
   ),
   seedCheck(
     3,
-    "Ananya Rao",
+    "Jiss Poulose",
     "Throbbing headache on one side, sensitive to light, nausea, happens most Fridays.",
     "routine",
     [
