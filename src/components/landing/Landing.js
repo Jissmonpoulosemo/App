@@ -1,6 +1,6 @@
 import React from "react";
 import {
-  Activity, Users, LayoutDashboard, CalendarClock, ShieldAlert, 
+  Activity, Users, CalendarClock, ShieldAlert, 
   Stethoscope, FileText, Sparkles, ArrowRight, ChevronRight, 
   Heart, Shield, Award, Star, Check
 } from "lucide-react";
